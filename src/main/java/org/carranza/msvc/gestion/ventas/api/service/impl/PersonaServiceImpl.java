@@ -103,4 +103,19 @@ public class PersonaServiceImpl implements PersonaService {
         return true;
     }
 
+    @Override
+    public Page<PersonaDTO> findAllPageCliente(Pageable paginador) {
+        Page<PersonaEntity> lstPersonaEntity = PersonaRepository.findAllPageCliente(paginador);
+        List<PersonaDTO>  result = lstPersonaEntity.stream().map(PersonaMapper::entityToGetDto).collect(Collectors.toList());
+
+        return (Page<PersonaDTO>) PageUtil.paginate(result, paginador, lstPersonaEntity.getTotalElements());
+    }
+
+    @Override
+    public Page<PersonaDTO> findAllPageProveedor(Pageable paginador) {
+        Page<PersonaEntity> lstPersonaEntity = PersonaRepository.findAllPageProveedor(paginador);
+        List<PersonaDTO>  result = lstPersonaEntity.stream().map(PersonaMapper::entityToGetDto).collect(Collectors.toList());
+
+        return (Page<PersonaDTO>) PageUtil.paginate(result, paginador, lstPersonaEntity.getTotalElements());
+    }
 }

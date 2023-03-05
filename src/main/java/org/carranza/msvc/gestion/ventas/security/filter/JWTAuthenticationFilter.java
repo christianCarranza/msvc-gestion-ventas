@@ -41,31 +41,20 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
-		/*
-		 * log.info("attemptAuthentication...");
-		 * log.info("attemptAuthentication..."+request.getMethod());
-		 * log.info("attemptAuthentication..."+request.getRequestURI());
-		 */		try {
-
-			System.out.println("usuario json " + request.getInputStream());
-
+		try {
 			UsuarioEntity usuario = new ObjectMapper().readValue(request.getInputStream(), UsuarioEntity.class);
-
-			System.out.println("usuario " + usuario);
 
 			UsernamePasswordAuthenticationToken upat = new UsernamePasswordAuthenticationToken(usuario.getUsuario(),
 					usuario.getClave(), new ArrayList<>());
-
-			System.out.println("upat" + upat);
 
 			Authentication aut = authenticationManager.authenticate(upat);
 
 			return aut;
 
 		} catch (IOException e) {
-			System.out.println("attemptAuthentication " + e.getMessage());
-			throw new RuntimeException(e);
+			log.info("attemptAuthentication " + e.getMessage());
 		}
+		return null;
 	}
 
 	@Override
@@ -75,19 +64,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		 if (request.getHeader(Constants.HEADER_REFRESH_TOKEN_KEY) == null) {
 			 String refresh_token = jwtUtils.generateJwtToken(auth,true);
 			 response.addHeader("Access-Control-Expose-Headers", Constants.HEADER_REFRESH_TOKEN_KEY);
-
              response.setHeader(Constants.HEADER_REFRESH_TOKEN_KEY, refresh_token);
-             log.info("Refresh Token : {}", refresh_token);
          }
 		
 		String token = jwtUtils.generateJwtToken(auth, false);
-
-		log.info("token " + token);
-
 		response.addHeader("Access-Control-Expose-Headers", "Authorization");
-
 		response.addHeader(Constants.HEADER_AUTHORIZACION_KEY, Constants.TOKEN_BEARER_PREFIX + " " + token);
 
 	}
-
 }

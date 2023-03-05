@@ -20,11 +20,14 @@ public class ConstantesUtil {
   public static final String EXCEL_HEADER = "attachment; filename=reporte.xlsx";
 
   //Path
-  public static final String  API_ARTICULO="/private/v1/articulos";
-  public static final String  API_CATEGORIA="/private/v1/categorias";
-  public static final String  API_PERSONA="/private/v1/personas";
-  public static final String  API_VENTAS="/private/v1/ventas";
+  public static final String  API_ARTICULO="/shared/v1/articulo";
+  public static final String  API_CATEGORIA="/almacen/v1/categoria";
+  public static final String  API_PERSONA="/shared/v1/persona";
+  public static final String  API_VENTAS="/venta/v1/venta";
+  public static final String  API_INGRESOS="/almacen/v1/ingreso";
 
-  public static final String  API_TASA_ADQUISICION="/v1/tasa-adquisicion";
-  public static final String  API_TASA_CONVERSION="/v1/tasa-conversion";
+
+  public static final String  API_USUARIOS="/private/v1/usuario";
+  public static final String  API_ROLES="/private/v1/rol";
+
 }

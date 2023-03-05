@@ -14,4 +14,10 @@ public interface PersonaRepository extends JpaRepository<PersonaEntity, UUID> {
 
     @Query("select c from PersonaEntity c")
     Page<PersonaEntity> findAllPage(Pageable pageable);
+
+    @Query("select c from PersonaEntity c where c.tipoPersona = 'Cliente'")
+    Page<PersonaEntity> findAllPageCliente(Pageable pageable);
+
+    @Query("select c from PersonaEntity c where c.tipoPersona = 'Proveedor'")
+    Page<PersonaEntity> findAllPageProveedor(Pageable pageable);
 }

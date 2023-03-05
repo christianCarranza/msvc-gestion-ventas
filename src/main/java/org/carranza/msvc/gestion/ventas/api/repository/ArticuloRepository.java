@@ -19,4 +19,8 @@ public interface ArticuloRepository extends JpaRepository<ArticuloEntity, UUID> 
 
     @Query("select c from ArticuloEntity c")
     Page<ArticuloEntity> findAllPage(Pageable pageable);
+
+
+    @Query("select c from ArticuloEntity c where c.codigo = :codigo AND c.estado = 1")
+    Optional<ArticuloEntity> findByCodigo(String codigo);
 }

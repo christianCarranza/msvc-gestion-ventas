@@ -27,7 +27,7 @@ public class IngresoDTO extends AuditoriaDTO {
 
     private PersonaDTO proveedor;
 
-    private UsuarioDTO usuario;
+    private UsuarioVentaDTO usuario;
 
 }
 

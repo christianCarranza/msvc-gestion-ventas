@@ -35,12 +35,10 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 		log.info("doFilterInternal...");
 		try {
 			String jwt = jwtUtils.parseJwt(request);
-			//log.info("jwt  {}", jwt);
-			
+
 			if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
 
 				String username = jwtUtils.getUserNameFromJwtToken(jwt);
-				//log.info("username {}", username);
 				UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
 				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -48,19 +46,17 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 
 				String token = jwtUtils.generateJwtToken(authentication, false);
 
-				log.info("token " + token);
 
 				response.addHeader("Access-Control-Expose-Headers", "Authorization");
 
 				response.addHeader(Constants.HEADER_AUTHORIZACION_KEY, Constants.TOKEN_BEARER_PREFIX + " " + token);
-				//log.info("authentication {}", authentication);
 				 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 			}
 		} catch (Exception e) {
 			log.error("Cannot set user authentication: {}", e);
-			throw new ServletException();
+//			throw new ServletException();
 		}
 
 		filterChain.doFilter(request, response);

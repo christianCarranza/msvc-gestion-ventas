@@ -24,6 +24,6 @@ public class VentaDTO extends AuditoriaDTO {
 
     private PersonaDTO cliente;
 
-    private UsuarioDTO usuario;
+    private UsuarioVentaDTO usuario;
 
 }

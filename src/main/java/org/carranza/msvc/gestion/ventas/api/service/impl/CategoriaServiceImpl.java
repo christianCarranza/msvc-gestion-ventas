@@ -34,8 +34,6 @@ public class CategoriaServiceImpl implements CategoriaService {
         Page<CategoriaEntity> lstCategoriaEntity = categoriaRepository.findAllPage(paginador);
         List<CategoriaDTO>  result = lstCategoriaEntity.stream().map(categoriaMapper::entityToGetDto).collect(Collectors.toList());
 
-        result.forEach(categoriaDTO -> categoriaDTO.setFechaCreacion(null));//quitar
-
         return (Page<CategoriaDTO>) PageUtil.paginate(result, paginador, lstCategoriaEntity.getTotalElements());
     }
 

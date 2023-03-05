@@ -11,8 +11,8 @@ import java.util.UUID;
 @Data
 public class AuditoriaDTO {
     private Integer estado;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime fechaCreacion = LocalDateTime.now();
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    private LocalDateTime fechaCreacion = LocalDateTime.now();
     private UUID usuarioCreacion;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime fechaModificacion;

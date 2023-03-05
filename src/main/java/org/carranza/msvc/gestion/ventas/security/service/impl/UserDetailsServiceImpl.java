@@ -36,7 +36,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		try {
 			
 			UsuarioEntity usuarioEntity= usuarioRepository.loadUserByUsuario(username).orElseThrow(null);
-			log.info("usuarioEntity {}",usuarioEntity);
 			if (isNull(usuarioEntity)) {
 				throw new UsernameNotFoundException("Usuario no encontrado!");
 			}
@@ -59,7 +58,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		for (RolEntity authorityEntity : authorities) {
 			authorityList.add(new SimpleGrantedAuthority(authorityEntity.getNombre()));
 		}
-		log.info("authorityList {}",authorityList);
 		return authorityList;
 	}	
 }

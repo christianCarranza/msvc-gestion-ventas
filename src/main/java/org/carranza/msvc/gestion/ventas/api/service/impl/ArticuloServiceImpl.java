@@ -105,4 +105,11 @@ public class ArticuloServiceImpl implements ArticuloService {
         Optional<ArticuloEntity> lstArticuloEntity = this.ArticuloRepository.findByLikeNombre(nombre);
         return lstArticuloEntity.stream().map(ArticuloMapper::entityToGetDto).collect(Collectors.toList());
     }
+
+    @Override
+    public ArticuloDTO findByCodigo(String codigo) {
+        ArticuloEntity Articulo = this.ArticuloRepository.findByCodigo(codigo).orElseThrow(() -> new NotFoundException("No existe un registro para el ID suministrado."));
+
+        return ArticuloMapper.entityToGetDto(Articulo);
+    }
 }

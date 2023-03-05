@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -28,6 +29,7 @@ public class ArticuloController {
 
     @GetMapping("/findAllPage")
     @ResponseBody
+    @PreAuthorize("hasRole('ROLE_ALMACENERO') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<CustomResponse> findAllPage(Pageable paginador){
         Page<ArticuloDTO> lstArticuloDTO= this.ArticuloService.findAllPage(paginador);
         if (lstArticuloDTO.isEmpty()) {
@@ -38,6 +40,7 @@ public class ArticuloController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_ALMACENERO') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<CustomResponse> findAll(){
         List<ArticuloDTO> lstArticuloDTO= this.ArticuloService.findAll();
         if (lstArticuloDTO.isEmpty()) {
@@ -48,14 +51,24 @@ public class ArticuloController {
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasRole('ROLE_ALMACENERO') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<CustomResponse> findById(@PathVariable UUID id) {
         var persona = this.ArticuloService.findById(id);
         CustomResponse rpta = new CustomResponse(String.valueOf(CodeEnum.SUCCESS), persona, null);
         return new ResponseEntity<>(rpta, HttpStatus.OK);
     }
 
+    @GetMapping("/findByCodigo/{codigo}")
+    @PreAuthorize("hasRole('ROLE_VENDEDOR') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<CustomResponse> findByCodigo(@PathVariable String codigo) {
+        var persona = this.ArticuloService.findByCodigo(codigo);
+        CustomResponse rpta = new CustomResponse(String.valueOf(CodeEnum.SUCCESS), persona, null);
+        return new ResponseEntity<>(rpta, HttpStatus.OK);
+    }
+
     @GetMapping("/byNombre")
     @ResponseBody
+    @PreAuthorize("hasRole('ROLE_ALMACENERO') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<CustomResponse> findByLikeNombre(@RequestParam(name = "nombre", defaultValue = "") String nombre){
         List<ArticuloDTO> lstArticuloDTO= this.ArticuloService.findByLikeNombre(nombre);
         CustomResponse rpta;
@@ -68,6 +81,7 @@ public class ArticuloController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_ALMACENERO') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<CustomResponse> save(@Valid @RequestBody ArticuloDTO ArticuloDTO){
         ArticuloDTO Articulo = this.ArticuloService.save(ArticuloDTO);
         CustomResponse r = new CustomResponse(String.valueOf(CodeEnum.SUCCESS), Articulo, "Articulo registrado correctamente.");
@@ -75,6 +89,7 @@ public class ArticuloController {
     }
 
     @PatchMapping("{id}")
+    @PreAuthorize("hasRole('ROLE_ALMACENERO') or hasRole('ROLE_ADMIN')")
     @ResponseBody
     public ResponseEntity<CustomResponse> update( @PathVariable UUID id,  @RequestBody ArticuloDTO ArticuloDTO) {
         ArticuloDTO result = this.ArticuloService.update(id, ArticuloDTO);
@@ -84,6 +99,7 @@ public class ArticuloController {
     }
 
     @PutMapping("delete/{id}")
+    @PreAuthorize("hasRole('ROLE_ALMACENERO') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<CustomResponse> delete( @PathVariable UUID id,  @RequestBody ArticuloDTO ArticuloDTO) {
         Boolean result = this.ArticuloService.delete(id, ArticuloDTO);
         CustomResponse rpta = new CustomResponse(Boolean.TRUE.equals(result)?"1":"0", Boolean.TRUE.equals(result) ? "Eliminado correctamente":"Error al eliminar");

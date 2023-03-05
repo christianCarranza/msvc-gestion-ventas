@@ -30,33 +30,27 @@ public class JWTUtils {
 		
 		 Collection<? extends GrantedAuthority> authorities=userPrincipal.getAuthorities();
 			
-		//System.out.println("Authorities -> "+ authorities);
-		
 		 Long time= (!swRefreshToken)?Constants.TOKEN_EXPIRATION_TIME_TOKEN:Constants.TOKEN_EXPIRATION_TIME_REFRESH_TOKEN;
 		
-		Collection<?> authoritiesItems= authorities.stream()
+		 Collection<?> authoritiesItems= authorities.stream()
 				.map(GrantedAuthority::getAuthority)
 				.collect(Collectors.toList());
-		
-		String token = Jwts
-						.builder()
-						.setIssuedAt(new Date()).setIssuer(Constants.ISSUER_INFO)
-						.setSubject(userPrincipal.getUsername())
-						.setExpiration(new Date(System.currentTimeMillis() + time))
-						.claim(Constants.AUTHORITIES, authoritiesItems)
-						.signWith(SignatureAlgorithm.HS512, Constants.SUPER_SECRET_KEY)
-						.compact();
-		
-		System.out.println("token -> "+token);
-		return token;
+
+		return Jwts
+					   .builder()
+					   .setIssuedAt(new Date()).setIssuer(Constants.ISSUER_INFO)
+					   .setSubject(userPrincipal.getUsername())
+					   .setExpiration(new Date(System.currentTimeMillis() + time))
+					   .claim(Constants.AUTHORITIES, authoritiesItems)
+					   .signWith(SignatureAlgorithm.HS512, Constants.SUPER_SECRET_KEY)
+					   .compact();
 	}
 	
 	public String generateJwtFromTokenRefresh(String refreshToken) {
 		String username = this.getUserNameFromJwtToken(refreshToken);
-		log.info("username {}", username);
 		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-		String token = Jwts
+		return Jwts
 						.builder()
 						.setIssuedAt(new Date()).setIssuer(Constants.ISSUER_INFO)
 						.setSubject(userDetails.getUsername())
@@ -64,9 +58,6 @@ public class JWTUtils {
 						.claim(Constants.AUTHORITIES, userDetails.getAuthorities())
 						.signWith(SignatureAlgorithm.HS512, Constants.SUPER_SECRET_KEY)
 						.compact();
-		
-		System.out.println("token -> "+token);
-		return token;
 	}
 
 	public String getUserNameFromJwtToken(String token) {
@@ -74,15 +65,14 @@ public class JWTUtils {
 	}
 
 	public boolean validateJwtToken(String authToken) throws Exception  {
-		System.out.println("authToken "+authToken);
 		try {
 			Jwts.parser().setSigningKey(Constants.SUPER_SECRET_KEY).parseClaimsJws(authToken);
 			return true;
 		} catch (Exception e) {
 			log.error("Invalid JWT signature: {}", e.getMessage());
-			throw new Exception();
 		}
 
+		return false;
 	}
 	
 	public String parseJwt(HttpServletRequest request) {
