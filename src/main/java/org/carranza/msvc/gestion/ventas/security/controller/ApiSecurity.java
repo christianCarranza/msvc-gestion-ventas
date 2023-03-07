@@ -17,7 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,6 +34,7 @@ import org.carranza.msvc.gestion.ventas.security.service.UsuarioService;
 import org.carranza.msvc.gestion.ventas.security.utils.JWTUtils;
 import org.carranza.msvc.gestion.ventas.security.utils.TOTPUtil;
 
+import static org.carranza.msvc.gestion.ventas.security.utils.Constants.LOGIN_URL;
 import static org.carranza.msvc.gestion.ventas.security.utils.Constants.REFRESH_TOKEN_URL;
 
 @Slf4j
@@ -60,7 +60,7 @@ public class ApiSecurity {
 	@Autowired
 	private AuthenticationManagerBuilder authenticationManagerBuilder;
 
-	@PostMapping("/login")
+	@PostMapping(LOGIN_URL)
 	public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) throws TokenException {
 		try {
 

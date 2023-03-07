@@ -16,7 +16,7 @@ public class Constants {
 
     // JWT
 
-    public static final String ISSUER_INFO = "http://www.galaxy.edu.pe/";
+    public static final String ISSUER_INFO = "http://www.sistemaventas.com/";
 
     //https://www.allkeysgenerator.com/ Encryption key 512-bit
 
