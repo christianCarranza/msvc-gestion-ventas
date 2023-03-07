@@ -35,6 +35,8 @@ import org.carranza.msvc.gestion.ventas.security.service.UsuarioService;
 import org.carranza.msvc.gestion.ventas.security.utils.JWTUtils;
 import org.carranza.msvc.gestion.ventas.security.utils.TOTPUtil;
 
+import static org.carranza.msvc.gestion.ventas.security.utils.Constants.REFRESH_TOKEN_URL;
+
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -86,7 +88,7 @@ public class ApiSecurity {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
 		} catch (Exception e) {
-			System.out.println("attemptAuthentication " + e.getMessage());
+			log.info("attemptAuthentication " + e.getMessage());
 			throw new SecurityException(e);
 		}
 	}
@@ -126,12 +128,12 @@ public class ApiSecurity {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("attemptAuthentication " + e.getMessage());
+			log.info("attemptAuthentication " + e.getMessage());
 			throw new TokenException(e);
 		}
 	}
 
-	@PostMapping("/refreshtoken")
+	@PostMapping(REFRESH_TOKEN_URL)
 	public ResponseEntity<?> refreshtoken(@RequestBody RefreshTokenRequest refreshTokenRequest) throws Exception {
 		try {
 			String tokenRequest = refreshTokenRequest.getToken();

@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.carranza.msvc.gestion.ventas.security.configuration.JWTHTTPConfigurer;
 import org.carranza.msvc.gestion.ventas.security.utils.JWTUtils;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 @RequiredArgsConstructor
@@ -69,6 +71,24 @@ public class SpringSecurityConfiguration {
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(bCryptPasswordEncoder);
         return authProvider;
+    }
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        //.allowedOrigins("*")
+                        .allowedOrigins("http://localhost:4200", "http://localhost:8086")
+                        //.allowedMethods("*");
+                        .allowedMethods("GET", "POST", "PUT", /*"DELETE"*/"HEAD", "OPTIONS")
+                        .allowedHeaders("Access-Control-Allow-Headers", "Authorization",
+                                "Access-Control-Allow-Origin", "Cache-Control", "Content-Type")
+                        .exposedHeaders("Access-Control-Allow-Headers", "Authorization",
+                                "Access-Control-Allow-Origin", "Cache-Control", "Content-Type");
+            }
+        };
     }
 
 }
