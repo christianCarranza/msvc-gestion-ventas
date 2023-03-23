@@ -17,9 +17,9 @@ public class ArticuloDTO extends AuditoriaDTO {
 
     private String nombre;
 
-    private String precioVenta;
+    private Double precioVenta;
 
-    private String stock;
+    private Integer stock;
 
     private String descripcion;
 

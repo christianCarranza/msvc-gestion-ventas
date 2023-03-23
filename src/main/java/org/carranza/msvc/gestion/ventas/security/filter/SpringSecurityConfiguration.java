@@ -43,12 +43,12 @@ public class SpringSecurityConfiguration {
         http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/libre/**").permitAll());
 
         http.authorizeHttpRequests(authorize -> authorize
-				.requestMatchers("/public/**").hasRole("USER")
-                .requestMatchers("/venta/**").hasRole("VENDEDOR")
-                .requestMatchers("/almacen/**").hasRole("ALMACENERO")
+				.requestMatchers("/public/**").hasAnyRole("ADMIN", "USER")
+                .requestMatchers("/venta/**").hasAnyRole("ADMIN", "VENDEDOR")
+                .requestMatchers("/almacen/**").hasAnyRole("ADMIN", "ALMACENERO")
                 .requestMatchers("/private/**").hasRole("ADMIN")
 				.requestMatchers("/shared/**").hasAnyRole("ADMIN", "USER", "VENDEDOR", "ALMACENERO")
-                .requestMatchers("/**").hasRole("ADMIN")
+//                .requestMatchers("/**").hasRole("ADMIN")
 				.anyRequest()
 				.authenticated());
 
@@ -79,14 +79,14 @@ public class SpringSecurityConfiguration {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        //.allowedOrigins("*")
-                        .allowedOrigins("http://localhost:4200", "http://localhost:8086")
-                        //.allowedMethods("*");
-                        .allowedMethods("GET", "POST", "PUT", /*"DELETE"*/"HEAD", "OPTIONS")
-                        .allowedHeaders("Access-Control-Allow-Headers", "Authorization",
-                                "Access-Control-Allow-Origin", "Cache-Control", "Content-Type")
-                        .exposedHeaders("Access-Control-Allow-Headers", "Authorization",
-                                "Access-Control-Allow-Origin", "Cache-Control", "Content-Type");
+                        .allowedOrigins("*")
+//                        .allowedOrigins("http://localhost:4200", "http://localhost:8086")
+                        .allowedMethods("*");
+//                        .allowedMethods("GET", "POST", "PUT", /*"DELETE"*/"HEAD", "OPTIONS")
+//                        .allowedHeaders("Access-Control-Allow-Headers", "Authorization",
+//                                "Access-Control-Allow-Origin", "Cache-Control", "Content-Type")
+//                        .exposedHeaders("Access-Control-Allow-Headers", "Authorization",
+//                                "Access-Control-Allow-Origin", "Cache-Control", "Content-Type");
             }
         };
     }

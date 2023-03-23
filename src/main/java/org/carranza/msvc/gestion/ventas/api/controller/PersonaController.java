@@ -31,7 +31,7 @@ public class PersonaController {
     @ResponseBody
     @PreAuthorize("hasRole('ROLE_VENDEDOR') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<CustomResponse> findAllPageCliente(Pageable paginador){
-        Page<PersonaDTO> lstPersonaDTO= this.PersonaService.findAllPage(paginador);
+        Page<PersonaDTO> lstPersonaDTO= this.PersonaService.findAllPageCliente(paginador);
         if (lstPersonaDTO.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

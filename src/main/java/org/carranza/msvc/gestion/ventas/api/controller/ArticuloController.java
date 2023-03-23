@@ -102,7 +102,7 @@ public class ArticuloController {
     @PreAuthorize("hasRole('ROLE_ALMACENERO') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<CustomResponse> delete( @PathVariable UUID id,  @RequestBody ArticuloDTO ArticuloDTO) {
         Boolean result = this.ArticuloService.delete(id, ArticuloDTO);
-        CustomResponse rpta = new CustomResponse(Boolean.TRUE.equals(result)?"1":"0", Boolean.TRUE.equals(result) ? "Eliminado correctamente":"Error al eliminar");
+        CustomResponse rpta = new CustomResponse(Boolean.TRUE.equals(result)?"1":"0", Boolean.TRUE.equals(result) ? "Actulizado correctamente":"Error al eliminar");
         return new ResponseEntity<>(rpta, HttpStatus.OK);
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -11,10 +12,10 @@ import java.util.UUID;
 @Data
 public class AuditoriaDTO {
     private Integer estado;
-//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-//    private LocalDateTime fechaCreacion = LocalDateTime.now();
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date fechaCreacion = new Date();
     private UUID usuarioCreacion;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime fechaModificacion;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date fechaModificacion;
     private UUID usuarioModificacion;
 }
