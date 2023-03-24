@@ -13,5 +13,6 @@ import lombok.NoArgsConstructor;
 public class CodeResponse {
 
 	private String code;
+	private String message;
 
 }

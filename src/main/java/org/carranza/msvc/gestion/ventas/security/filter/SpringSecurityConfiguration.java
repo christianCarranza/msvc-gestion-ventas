@@ -13,7 +13,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.carranza.msvc.gestion.ventas.security.configuration.JWTHTTPConfigurer;
 import org.carranza.msvc.gestion.ventas.security.utils.JWTUtils;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -40,6 +39,7 @@ public class SpringSecurityConfiguration {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/auth/**").permitAll());
+		http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/resources/**").permitAll());
         http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/libre/**").permitAll());
 
         http.authorizeHttpRequests(authorize -> authorize
@@ -54,24 +54,25 @@ public class SpringSecurityConfiguration {
 
 
         http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(jWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
-        http.apply(new JWTHTTPConfigurer(jWTUtils));
-        return http.build();
+
+		http.addFilterBefore(jWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+
+		return http.build();
     }
 
     @Bean
-    public JWTAuthorizationFilter jWTAuthorizationFilter() {
-        return new JWTAuthorizationFilter();
-    }
+	public JWTAuthorizationFilter jWTAuthorizationFilter() {
+		return new JWTAuthorizationFilter();
+	}
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        log.info("Load authentication provider...");
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(bCryptPasswordEncoder);
-        return authProvider;
-    }
+	@Bean
+	public DaoAuthenticationProvider authenticationProvider() {
+		log.info("Load authentication provider...");
+		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+		authProvider.setUserDetailsService(userDetailsService);
+		authProvider.setPasswordEncoder(bCryptPasswordEncoder);
+		return authProvider;
+	}
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {

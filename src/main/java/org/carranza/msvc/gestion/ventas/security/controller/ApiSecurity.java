@@ -1,14 +1,20 @@
 package org.carranza.msvc.gestion.ventas.security.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.carranza.msvc.gestion.ventas.api.utils.CodeEnum;
+import org.carranza.msvc.gestion.ventas.api.utils.CustomResponse;
+import org.carranza.msvc.gestion.ventas.security.dto.*;
+import org.carranza.msvc.gestion.ventas.security.entity.RolEntity;
+import org.carranza.msvc.gestion.ventas.security.event.SecurityMailService;
 import org.carranza.msvc.gestion.ventas.security.utils.Constants;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -17,16 +23,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 import lombok.extern.slf4j.Slf4j;
-import org.carranza.msvc.gestion.ventas.security.dto.CodeResponse;
-import org.carranza.msvc.gestion.ventas.security.dto.LoginRequest;
-import org.carranza.msvc.gestion.ventas.security.dto.RefreshTokenRequest;
-import org.carranza.msvc.gestion.ventas.security.dto.TokenResponse;
 import org.carranza.msvc.gestion.ventas.security.entity.UsuarioEntity;
 import org.carranza.msvc.gestion.ventas.security.exceptions.TokenException;
 import org.carranza.msvc.gestion.ventas.security.exceptions.TokenRefreshException;
@@ -37,100 +40,92 @@ import org.carranza.msvc.gestion.ventas.security.utils.TOTPUtil;
 import static org.carranza.msvc.gestion.ventas.security.utils.Constants.LOGIN_URL;
 import static org.carranza.msvc.gestion.ventas.security.utils.Constants.REFRESH_TOKEN_URL;
 
+
+@RequiredArgsConstructor
 @Slf4j
 @RestController
 @RequestMapping("/auth")
 public class ApiSecurity {
 
-	@Autowired
-	private BCryptPasswordEncoder bCryptPasswordEncoder;
+	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-	@Autowired
-	private UserDetailsService userDetailsService;
+	private final  UserDetailsService userDetailsService;
 
-	@Autowired
-	private UsuarioService usuarioService;
+	private final JWTUtils jwtUtils;
 
-	@Autowired
-	private JWTUtils jwtUtils;
+	private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
-	@Autowired
-	private TOTPUtil tOTPUtil;
+	private final SecurityMailService securityMailService;
 
-	@Autowired
-	private AuthenticationManagerBuilder authenticationManagerBuilder;
+	private final UsuarioService usuarioService;
 
-	@PostMapping(LOGIN_URL)
-	public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) throws TokenException {
+	private final TOTPUtil tOTPUtil;
+
+	@Value("${mail.message}")
+	private String mailMessage;
+
+	@PostMapping("/login")
+	public ResponseEntity<?> login(HttpServletRequest request, @RequestBody LoginRequest loginRequest) throws TokenException {
 		try {
 
-			log.info("loginRequest {}", loginRequest);
-
 			UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsuario());
-
-			log.info("userDetails {}", userDetails);
-
-			Boolean sw = bCryptPasswordEncoder.matches(loginRequest.getClave(), userDetails.getPassword());
-
-			log.info("sw {}", sw);
 
 			if (userDetails != null) {
 				if (bCryptPasswordEncoder.matches(loginRequest.getClave(), userDetails.getPassword())) {
 
-					String code = tOTPUtil.generateCode();
-					// Save code
-					usuarioService.updateCodigo2F(code, loginRequest.getUsuario());
+					MailResponse mailResponse= MailResponse.builder().usuario(loginRequest.getUsuario()).build();
+					securityMailService.createCode(mailResponse);
 
-					return ResponseEntity.ok().body(CodeResponse.builder().code(code).build());
+					UsernamePasswordAuthenticationToken upat = new UsernamePasswordAuthenticationToken(
+							loginRequest.getUsuario(), loginRequest.getClave(), new ArrayList<>());
+
+					Authentication authentication = authenticationManagerBuilder.getObject().authenticate(upat);
+
+					upat.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+					SecurityContextHolder.getContext().setAuthentication(authentication);
+
+					return ResponseEntity.ok().body(CodeResponse.builder().message(mailMessage).build());
 				}
 			}
 
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
 		} catch (Exception e) {
-			log.info("attemptAuthentication " + e.getMessage());
 			throw new SecurityException(e);
 		}
+
 	}
 
 	@PostMapping("/verify-code/{code}")
 	public ResponseEntity<?> verifyCode(@PathVariable String code) throws TokenException {
-		try {
 
-			log.info("code {}", code);
-
+		HttpHeaders headers = new HttpHeaders();
 			if (tOTPUtil.verifyCode(code)) {
 
-				UsuarioEntity usuarioEntity=usuarioService.findByUsuario(code);
+				UsuarioEntity usuarioEntity = usuarioService.findByCodigo(code);
+
+				String usuario = usuarioEntity.getUsuario();
 
 				log.info("usuarioEntity {}", usuarioEntity);
 
-				UsernamePasswordAuthenticationToken upat = new UsernamePasswordAuthenticationToken(
-						usuarioEntity.getUsuario(), usuarioEntity.getClave());
+				String token = jwtUtils.generateJwtToken(usuario, false);
+				String refeshToken = jwtUtils.generateJwtToken(usuario, true);
 
-				Authentication authentication = authenticationManagerBuilder.getObject().authenticate(upat);
+				headers.add("Access-Control-Expose-Headers", Constants.HEADER_REFRESH_TOKEN_KEY);
+				headers.add(Constants.HEADER_REFRESH_TOKEN_KEY, refeshToken);
 
-				SecurityContextHolder.getContext().setAuthentication(authentication);
+				headers.add("Access-Control-Expose-Headers", "Authorization");
+				headers.add(Constants.HEADER_AUTHORIZACION_KEY, Constants.TOKEN_BEARER_PREFIX + " " + token);
 
-				Authentication aut = authenticationManagerBuilder.getObject().authenticate(upat);
+				CustomResponse rpta = new CustomResponse(String.valueOf(CodeEnum.SUCCESS), null, "Se genero el token");
 
-				UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+				return new ResponseEntity<>(headers, HttpStatus.OK);
 
-				String token = jwtUtils.generateJwtToken(aut, false);
-				String refeshToken = jwtUtils.generateJwtToken(aut, true);
-				List<String> authorities = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-						.collect(Collectors.toList());
-				return ResponseEntity.ok().body(TokenResponse.builder().user(userDetails.getUsername()).token(token)
-						.refreshToken(refeshToken).authorities(authorities).build());
-			}{
-				log.info("Code is invalid");
+			}else {
+				CustomResponse rpta = new CustomResponse(String.valueOf(CodeEnum.ERROR), null, "Codigo invalido");
+				return new ResponseEntity<>(rpta, HttpStatus.FORBIDDEN);
 			}
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-		} catch (Exception e) {
-			e.printStackTrace();
-			log.info("attemptAuthentication " + e.getMessage());
-			throw new TokenException(e);
-		}
 	}
 
 	@PostMapping(REFRESH_TOKEN_URL)
@@ -141,11 +136,16 @@ public class ApiSecurity {
 			if (jwtUtils.validateJwtToken(tokenRequest)) {
 
 				String token = jwtUtils.generateJwtFromTokenRefresh(tokenRequest);
+
 				log.info("token with refresh {}", token);
+
 				String user = jwtUtils.getUserNameFromJwtToken(token);
+
 				UserDetails userDetails = userDetailsService.loadUserByUsername(user);
+
 				List<String> authorities = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 						.collect(Collectors.toList());
+
 				return ResponseEntity.ok().body(TokenResponse.builder().user(user).token(token)
 						.refreshToken(tokenRequest).authorities(authorities).build());
 			}

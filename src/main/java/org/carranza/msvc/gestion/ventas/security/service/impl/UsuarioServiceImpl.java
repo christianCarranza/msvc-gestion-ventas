@@ -32,7 +32,13 @@ public class UsuarioServiceImpl implements UsuarioService {
 	@Override
 	public Boolean updateCodigo2F(String codigo2f, String usuario) {
 		try {
-			usuarioRepository.updateCodigo2F(codigo2f, usuario);
+
+			UsuarioEntity usuarioEntity = this.usuarioRepository.findByUsuario(usuario).get();
+			usuarioEntity.setCodigo2F(codigo2f);
+			usuarioEntity.setFechaModificacion(LocalDateTime.now());
+			usuarioRepository.saveAndFlush(usuarioEntity);
+
+//			usuarioRepository.updateCodigo2F(codigo2f, usuario);
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -41,8 +47,17 @@ public class UsuarioServiceImpl implements UsuarioService {
 	}
 
 	@Override
-	public UsuarioEntity findByUsuario(String codigo2f) {
-		return usuarioRepository.findByUsuario(codigo2f).get();
+	public UsuarioEntity findByCodigo(String codigo2f) {
+		try {
+			return usuarioRepository.findByCodigo(codigo2f).get();
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	@Override
+	public UsuarioEntity findByUsuario(String usuario) {
+		return usuarioRepository.findByUsuario(usuario).get();
 	}
 
 	@Override

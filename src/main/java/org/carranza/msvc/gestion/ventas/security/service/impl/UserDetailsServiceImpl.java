@@ -37,7 +37,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			
 			UsuarioEntity usuarioEntity= usuarioRepository.loadUserByUsuario(username).orElseThrow(null);
 			if (isNull(usuarioEntity)) {
-				throw new UsernameNotFoundException("Usuario no encontrado!");
+				return null;
 			}
 			
 			return User
@@ -48,7 +48,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 					.build();
 			
 		} catch (Exception e) {
-			throw new UsernameNotFoundException("Error al cargar usuario!");
+//			throw new UsernameNotFoundException("Error al cargar usuario!");
+			return null;
 		}
 
 	}

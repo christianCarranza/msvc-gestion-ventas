@@ -20,12 +20,16 @@ public interface UsuarioRepository extends JpaRepository<UsuarioEntity, UUID>{
 	@Query("select u from UsuarioEntity u where u.usuario=:usuario and u.estado=1")
 	Optional<UsuarioEntity> loadUserByUsuario(String usuario);
 
-	@Query("select u from UsuarioEntity u where u.codigo2F=:codigo2F and u.estado=1")
-	Optional<UsuarioEntity> findByUsuario(String codigo2F);
+	@Query("select u from UsuarioEntity u where u.usuario=:usuario and u.estado=1")
+	Optional<UsuarioEntity> findByUsuario(String usuario);
 
-	@Modifying
-	@Query(nativeQuery = true,value ="UPDATE UsuarioEntity SET CODIGO_2F=:codigo2F WHERE USUARIO=:usuario")
-	void updateCodigo2F(@Param("codigo2F") String codigo2F,@Param("usuario") String usuario);
+//	@Modifying
+//	@Transactional
+//	@Query(nativeQuery = true,value ="UPDATE usuarios SET CODIGO_2F=:codigo2F WHERE USUARIO=:usuario")
+//	void updateCodigo2F(@Param("codigo2F") String codigo2F,@Param("usuario") String usuario);
+
+	@Query("select u from UsuarioEntity u where u.codigo2F=:codigo2F")
+	Optional<UsuarioEntity> findByCodigo(String codigo2F);
 
 
 	@Query("select c from UsuarioEntity c")

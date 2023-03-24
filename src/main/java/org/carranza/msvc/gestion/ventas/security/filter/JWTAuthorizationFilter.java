@@ -15,9 +15,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.carranza.msvc.gestion.ventas.security.utils.Constants;
-import org.carranza.msvc.gestion.ventas.security.exceptions.TokenException;
-import org.carranza.msvc.gestion.ventas.security.exceptions.TokenRefreshException;
 import org.carranza.msvc.gestion.ventas.security.utils.JWTUtils;
 
 @Slf4j
@@ -35,7 +32,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 		log.info("doFilterInternal...");
 		try {
 			String jwt = jwtUtils.parseJwt(request);
-
+			
 			if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
 
 				String username = jwtUtils.getUserNameFromJwtToken(jwt);
@@ -44,8 +41,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
 						userDetails, userDetails.getPassword(), userDetails.getAuthorities());
 
-				String token = jwtUtils.generateJwtToken(authentication, false);
-
+				String token = jwtUtils.generateJwtToken(userDetails.getUsername(), false);
 
 				response.addHeader("Access-Control-Expose-Headers", "Authorization");
 
@@ -56,7 +52,6 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 			}
 		} catch (Exception e) {
 			log.error("Cannot set user authentication: {}", e);
-//			throw new ServletException();
 		}
 
 		filterChain.doFilter(request, response);

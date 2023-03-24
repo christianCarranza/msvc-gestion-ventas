@@ -24,26 +24,20 @@ public class JWTUtils {
 	@Autowired
 	private UserDetailsService userDetailsService;
 
-	public String generateJwtToken(Authentication authentication, Boolean swRefreshToken) {
+	public String generateJwtToken(String usuario, Boolean swRefreshToken) {
 
-		UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
-		
-		 Collection<? extends GrantedAuthority> authorities=userPrincipal.getAuthorities();
-			
-		 Long time= (!swRefreshToken)?Constants.TOKEN_EXPIRATION_TIME_TOKEN:Constants.TOKEN_EXPIRATION_TIME_REFRESH_TOKEN;
-		
-		 Collection<?> authoritiesItems= authorities.stream()
-				.map(GrantedAuthority::getAuthority)
-				.collect(Collectors.toList());
+		UserDetails userDetails = userDetailsService.loadUserByUsername(usuario);
+
+		Long time= (!swRefreshToken)?Constants.TOKEN_EXPIRATION_TIME_TOKEN:Constants.TOKEN_EXPIRATION_TIME_REFRESH_TOKEN;
 
 		return Jwts
-					   .builder()
-					   .setIssuedAt(new Date()).setIssuer(Constants.ISSUER_INFO)
-					   .setSubject(userPrincipal.getUsername())
-					   .setExpiration(new Date(System.currentTimeMillis() + time))
-					   .claim(Constants.AUTHORITIES, authoritiesItems)
-					   .signWith(SignatureAlgorithm.HS512, Constants.SUPER_SECRET_KEY)
-					   .compact();
+				.builder()
+				.setIssuedAt(new Date()).setIssuer(Constants.ISSUER_INFO)
+				.setSubject(usuario)
+				.setExpiration(new Date(System.currentTimeMillis() + time))
+				.claim(Constants.AUTHORITIES, userDetails.getAuthorities())
+				.signWith(SignatureAlgorithm.HS512, Constants.SUPER_SECRET_KEY)
+				.compact();
 	}
 	
 	public String generateJwtFromTokenRefresh(String refreshToken) {

@@ -11,8 +11,10 @@ import java.util.UUID;
 public interface UsuarioService {
 	
 	 Boolean updateCodigo2F(String codigo2F,String usuario);
+
+	UsuarioEntity findByCodigo(String codigo2F);
 	 
-	 UsuarioEntity findByUsuario(String codigo2F);
+	 UsuarioEntity findByUsuario(String usuario);
 
 	 //otros
 
